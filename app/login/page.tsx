@@ -14,6 +14,13 @@ export default function LoginPage() {
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
 
+  async function handleGoogleLogin() {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+  }
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -82,6 +89,20 @@ export default function LoginPage() {
             {loading ? "LOGGING IN..." : "LOG IN"}
           </button>
         </form>
+
+        <div className="my-5 flex items-center gap-3">
+          <div className="h-px flex-1 bg-edge" />
+          <span className="text-xs text-muted">OR</span>
+          <div className="h-px flex-1 bg-edge" />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          className="w-full border border-edge py-3 font-display tracking-[0.18em] text-ink transition-colors hover:border-ink"
+        >
+          CONTINUE WITH GOOGLE
+        </button>
 
         <p className="mt-6 text-sm text-muted">
           No account?{" "}

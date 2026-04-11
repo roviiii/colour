@@ -14,6 +14,13 @@ export default function SignupPage() {
   const [success, setSuccess]   = useState(false);
   const [loading, setLoading]   = useState(false);
 
+  async function handleGoogleSignup() {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+  }
+
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -27,8 +34,6 @@ export default function SignupPage() {
       return;
     }
 
-    // data.session is non-null when email confirmation is disabled.
-    // If present, save the username to the profiles row the trigger created.
     if (data.session && data.user) {
       await supabase
         .from("profiles")
@@ -111,6 +116,20 @@ export default function SignupPage() {
             {loading ? "CREATING..." : "CREATE ACCOUNT"}
           </button>
         </form>
+
+        <div className="my-5 flex items-center gap-3">
+          <div className="h-px flex-1 bg-edge" />
+          <span className="text-xs text-muted">OR</span>
+          <div className="h-px flex-1 bg-edge" />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleGoogleSignup}
+          className="w-full border border-edge py-3 font-display tracking-[0.18em] text-ink transition-colors hover:border-ink"
+        >
+          CONTINUE WITH GOOGLE
+        </button>
 
         <p className="mt-6 text-sm text-muted">
           Already have an account?{" "}

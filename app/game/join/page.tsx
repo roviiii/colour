@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase";
 
 export default function JoinGamePage() {
   const router = useRouter();
+  const supabase = createClient();
+
   const [code, setCode]       = useState("");
   const [error, setError]     = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,7 +22,32 @@ export default function JoinGamePage() {
     }
 
     setLoading(true);
-    // TODO: validate against Supabase, then redirect to lobby
+
+    const { data: game } = await supabase
+      .from("games")
+      .select("id, status")
+      .eq("code", code.toUpperCase())
+      .single();
+
+    if (!game) {
+      setError("Game not found. Check the code and try again.");
+      setLoading(false);
+      return;
+    }
+
+    if (game.status === "ended") {
+      setError("This game has already ended.");
+      setLoading(false);
+      return;
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    await supabase.from("game_players").insert({
+      game_id: game.id,
+      user_id: user!.id,
+    });
+
     router.push(`/game/${code.toUpperCase()}`);
   }
 

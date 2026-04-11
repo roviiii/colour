@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createGame } from "./actions";
 
-// Returns a datetime-local string for tomorrow at 23:59 in the user's local timezone.
-// datetime-local inputs need the format "YYYY-MM-DDTHH:MM".
 function defaultEndsAt() {
   const d = new Date();
   d.setDate(d.getDate() + 1);
@@ -12,23 +12,31 @@ function defaultEndsAt() {
   return new Date(d.getTime() - offset).toISOString().slice(0, 16);
 }
 
-// Shared label style — used on every field
 const labelClass = "mb-2 block text-[0.65rem] uppercase tracking-[0.2em] text-muted";
-
-// Shared input style — used on every text/datetime input
 const inputClass =
   "w-full border border-edge bg-transparent px-4 py-3 text-sm text-ink outline-none transition-colors focus:border-ink";
 
 export default function CreateGamePage() {
+  const router = useRouter();
+
   const [themeType, setThemeType]   = useState<"colour" | "word">("colour");
   const [themeValue, setThemeValue] = useState("");
   const [gameType, setGameType]     = useState<"competitive" | "friendly">("friendly");
   const [endsAt, setEndsAt]         = useState(defaultEndsAt());
+  const [error, setError]           = useState("");
+  const [loading, setLoading]       = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // TODO: insert into games table, redirect to /game/[code]
-    alert(`Creating a ${gameType} ${themeType} game: "${themeValue}" — ends ${endsAt}`);
+    setError("");
+    setLoading(true);
+    try {
+      const { code } = await createGame({ themeType, themeValue, gameType, endsAt });
+      router.push(`/game/${code}`);
+    } catch (err: any) {
+      setError(err.message || "Something went wrong. Please try again.");
+      setLoading(false);
+    }
   }
 
   return (
@@ -71,6 +79,7 @@ export default function CreateGamePage() {
               value={themeValue}
               onChange={(e) => setThemeValue(e.target.value)}
               placeholder={themeType === "colour" ? '"Ocean Blue"' : '"Nostalgia"'}
+              required
               className={`${inputClass} flex-1`}
             />
             <button
@@ -127,11 +136,14 @@ export default function CreateGamePage() {
           </p>
         </div>
 
+        {error && <p className="text-sm text-danger">{error}</p>}
+
         <button
           type="submit"
-          className="mt-2 w-full bg-ink py-3.5 font-display tracking-[0.18em] text-cream transition-opacity hover:opacity-75"
+          disabled={loading}
+          className="mt-2 w-full bg-ink py-3.5 font-display tracking-[0.18em] text-cream transition-opacity hover:opacity-75 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          CREATE GAME
+          {loading ? "CREATING..." : "CREATE GAME"}
         </button>
       </form>
     </div>
