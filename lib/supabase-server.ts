@@ -1,7 +1,3 @@
-// Server-side Supabase client.
-// Use this in Server Components and Route Handlers.
-// It reads cookies to know which user is logged in.
-
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
@@ -22,8 +18,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // Cookies can't be set in Server Components — that's fine,
-            // the middleware handles refreshing the session.
+            // ignored — middleware handles session refresh
           }
         },
       },
