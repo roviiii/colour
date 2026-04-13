@@ -75,6 +75,9 @@ export default async function PlayPage({
             gameType={game.game_type}
           />
         )}
+        {game.status === "ended" && (
+          <p className="font-display text-sm tracking-[0.2em] text-muted">GAME OVER</p>
+        )}
       </div>
       <CollageGallery
         userId={user.id}

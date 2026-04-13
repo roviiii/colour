@@ -4,6 +4,24 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createGame } from "./actions";
 
+const RANDOM_COLOURS = [
+  "Cerulean", "Vermillion", "Ochre", "Viridian", "Cobalt", "Chartreuse",
+  "Marigold", "Indigo", "Coral", "Sage", "Crimson", "Sienna", "Lilac",
+  "Teal", "Amber", "Ecru", "Scarlet", "Periwinkle", "Rust", "Jade",
+];
+
+const RANDOM_WORDS = [
+  "Nostalgia", "Solitude", "Wanderlust", "Metamorphosis", "Twilight",
+  "Entropy", "Serendipity", "Melancholy", "Euphoria", "Liminal",
+  "Reverie", "Desolation", "Bloom", "Fracture", "Ritual", "Echo",
+  "Threshold", "Cascade", "Remnant", "Dusk",
+];
+
+function randomTheme(type: "colour" | "word") {
+  const list = type === "colour" ? RANDOM_COLOURS : RANDOM_WORDS;
+  return list[Math.floor(Math.random() * list.length)];
+}
+
 function defaultEndsAt() {
   const d = new Date();
   d.setDate(d.getDate() + 1);
@@ -84,7 +102,7 @@ export default function CreateGamePage() {
             />
             <button
               type="button"
-              onClick={() => setThemeValue("Random")}
+              onClick={() => setThemeValue(randomTheme(themeType))}
               className="border border-edge px-4 text-xs uppercase tracking-[0.08em] text-ink transition-colors hover:bg-edge"
             >
               Random
