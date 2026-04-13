@@ -41,8 +41,9 @@ export default async function RootLayout({
     : { data: null };
 
   return (
-    <html lang="en" className={`${bebasNeue.variable} ${dmSans.variable}`}>
+    <html lang="en" className={`${bebasNeue.variable} ${dmSans.variable}`} suppressHydrationWarning>
       <body>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var h=new Date().getHours();if(h<6||h>=20)document.documentElement.setAttribute('data-theme','night');})()` }} />
         {user && (
           <Navbar
             avatarUrl={profile?.avatar_url ?? null}

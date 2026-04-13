@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase-server";
 import { redirect, notFound } from "next/navigation";
-import CollageBuilder from "@/components/CollageBuilder";
+import CollageGallery from "@/components/CollageGallery";
+import EndGameButton from "@/components/EndGameButton";
 
 export default async function PlayPage({
   params,
@@ -15,43 +16,74 @@ export default async function PlayPage({
 
   const { data: game } = await supabase
     .from("games")
-    .select("id, theme_type, theme_value, status")
+    .select("id, theme_type, theme_value, game_type, status, host_id")
     .eq("code", code.toUpperCase())
     .single();
 
   if (!game) notFound();
-  if (game.status === "ended") redirect(`/game/${code.toUpperCase()}`);
+  if (game.status === "voting") redirect(`/game/${code.toUpperCase()}/vote`);
+  if (game.status === "ended" && game.game_type === "competitive") redirect(`/game/${code.toUpperCase()}/results`);
+
+  const { data: gamePlayers } = await supabase
+    .from("game_players")
+    .select("user_id")
+    .eq("game_id", game.id);
+
+  const playerIds = gamePlayers?.map((p) => p.user_id) ?? [];
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, username")
+    .in("id", playerIds);
+
+  const { data: collages } = await supabase
+    .from("collages")
+    .select("user_id, photos")
+    .eq("game_id", game.id);
 
   await supabase.from("collages").upsert(
     { game_id: game.id, user_id: user.id, photos: [] },
     { onConflict: "game_id,user_id", ignoreDuplicates: true }
   );
 
-  const { data: collage } = await supabase
-    .from("collages")
-    .select("photos")
-    .eq("game_id", game.id)
-    .eq("user_id", user.id)
-    .single();
-
-  const photos: (string | null)[] = Array.from({ length: 9 }, (_, i) =>
-    (collage?.photos as (string | null)[])?.[i] ?? null
-  );
+  const players = [...playerIds].sort((a, b) => (a === user.id ? -1 : b === user.id ? 1 : 0)).map((id) => {
+    const profile = profiles?.find((p) => p.id === id);
+    const collage = collages?.find((c) => c.user_id === id);
+    const rawPhotos = (collage?.photos as (string | null)[]) ?? [];
+    const photos: (string | null)[] = Array.from(
+      { length: 9 },
+      (_, i) => rawPhotos[i] ?? null
+    );
+    return { id, username: profile?.username ?? null, photos };
+  });
 
   return (
-    <div className="fade-up max-w-sm">
-      <div className="mb-2 text-xs uppercase tracking-[0.2em] text-muted">
-        {game.theme_type}
+    <div className="w-full">
+      <div className="fade-up mb-10 flex items-end justify-between">
+        <div>
+          <div className="mb-2 text-xs uppercase tracking-[0.2em] text-muted">
+            {game.game_type} · {game.theme_type}
+          </div>
+          <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.9] tracking-[0.02em]">
+            {game.theme_value}
+          </h1>
+        </div>
+        {user.id === game.host_id && game.status === "playing" && (
+          <EndGameButton
+            gameId={game.id}
+            code={code.toUpperCase()}
+            gameType={game.game_type}
+          />
+        )}
       </div>
-      <h1 className="mb-8 font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.9] tracking-[0.02em]">
-        {game.theme_value}
-      </h1>
-      <CollageBuilder
-        gameId={game.id}
+      <CollageGallery
         userId={user.id}
         code={code.toUpperCase()}
-        initialPhotos={photos}
+        gameType={game.game_type}
+        gameEnded={game.status === "ended"}
+        players={players}
       />
     </div>
   );
+
 }

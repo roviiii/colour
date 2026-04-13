@@ -97,7 +97,7 @@ export default function CollageBuilder({ gameId, userId, code, initialPhotos }: 
 
       <button
         type="button"
-        onClick={() => router.push(`/game/${code}`)}
+        onClick={() => router.push(`/game/${code}/play`)}
         className="mt-6 w-full border border-ink py-3 font-display tracking-[0.18em] text-ink transition-opacity hover:opacity-75"
       >
         DONE

@@ -1,9 +1,6 @@
 @import "tailwindcss";
 
-/* ── Design tokens → Tailwind utilities ─────────────────────
-   These become bg-cream, text-ink, border-edge, font-display etc.
-   ─────────────────────────────────────────────────────────── */
-@theme inline {
+@theme {
   --color-cream:   #F6F3EE;
   --color-ink:     #0F0F0F;
   --color-muted:   #999999;
@@ -16,9 +13,16 @@
 }
 
 body {
-  background-color: #F6F3EE;
-  color: #0F0F0F;
+  background-color: var(--color-cream);
+  color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
+}
+
+[data-theme="night"] {
+  --color-cream:  #0F0F0F;
+  --color-ink:    #F6F3EE;
+  --color-edge:   #2A2520;
+  --color-muted:  #777777;
 }
 
 /* ── Spectrum gradient text ──────────────────────────────────

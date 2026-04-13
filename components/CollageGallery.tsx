@@ -1,0 +1,153 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+
+type Player = {
+  id: string;
+  username: string | null;
+  photos: (string | null)[];
+};
+
+type Props = {
+  userId: string;
+  code: string;
+  gameType: "competitive" | "friendly";
+  gameEnded: boolean;
+  players: Player[];
+};
+
+export default function CollageGallery({ userId, code, gameType, gameEnded, players }: Props) {
+  const [zoomed, setZoomed]   = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<string | null>(null);
+
+  const zoomedPlayer = players.find((p) => p.id === zoomed);
+  const isBlurred = (playerId: string) =>
+    gameType === "competitive" && !gameEnded && playerId !== userId;
+
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-8">
+        {players.map((player) => (
+          <div key={player.id}>
+            <div className="mb-3 flex items-center gap-2">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-edge text-xs text-muted">
+                {(player.username ?? "?")[0].toUpperCase()}
+              </span>
+              <span className="text-sm text-ink">{player.username ?? "unnamed"}</span>
+              {player.id === userId && (
+                <Link
+                  href={`/game/${code}/play/build`}
+                  className="ml-auto text-xs text-muted underline underline-offset-2 hover:text-ink"
+                >
+                  edit
+                </Link>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setZoomed(player.id)}
+              className="relative w-full border border-edge hover:border-ink transition-colors"
+            >
+              <div
+                className={`grid grid-cols-3 gap-[2px] ${
+                  isBlurred(player.id) ? "blur-sm" : ""
+                }`}
+              >
+                {player.photos.map((photo, i) => (
+                  <div key={i} className="aspect-square bg-edge">
+                    {photo && (
+                      <img
+                        src={photo}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {isBlurred(player.id) && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <p className="font-display text-[0.65rem] tracking-[0.2em] text-ink">
+                    REVEALED WHEN GAME ENDS
+                  </p>
+                </div>
+              )}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {zoomed && zoomedPlayer && (
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center bg-ink/60"
+          onClick={() => setZoomed(null)}
+        >
+          <div
+            className="relative w-[90vw] max-w-2xl bg-cream p-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <p className="font-display text-[1.4rem] tracking-[0.05em]">
+                {zoomedPlayer.username ?? "unnamed"}
+              </p>
+              <button
+                onClick={() => setZoomed(null)}
+                className="text-xl text-muted hover:text-ink"
+              >
+                ×
+              </button>
+            </div>
+
+            <div
+              className={`grid grid-cols-3 gap-1 ${
+                isBlurred(zoomedPlayer.id) ? "blur-sm" : ""
+              }`}
+            >
+              {zoomedPlayer.photos.map((photo, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  disabled={!photo || isBlurred(zoomedPlayer.id)}
+                  onClick={() => photo && setLightbox(photo)}
+                  className="aspect-square bg-edge transition-opacity hover:opacity-80 disabled:cursor-default disabled:hover:opacity-100"
+                >
+                  {photo ? (
+                    <img
+                      src={photo}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : null}
+                </button>
+              ))}
+            </div>
+
+            {isBlurred(zoomedPlayer.id) && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <p className="font-display text-[0.65rem] tracking-[0.2em] text-ink">
+                  REVEALED WHEN GAME ENDS
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black"
+          onClick={() => setLightbox(null)}
+        >
+          <img
+            src={lightbox}
+            alt=""
+            className="max-h-screen max-w-full object-contain"
+          />
+        </div>
+      )}
+    </>
+  );
+}
