@@ -31,7 +31,7 @@ export default async function GameLobbyPage({
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, username")
+    .select("id, username, avatar_url")
     .in("id", playerIds);
 
   const endsAt = new Date(game.ends_at);
@@ -76,9 +76,13 @@ export default async function GameLobbyPage({
           <ul className="flex flex-col gap-3">
             {profiles?.map((profile) => (
               <li key={profile.id} className="flex items-center gap-3 text-sm">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-edge text-xs text-muted">
-                  {(profile.username ?? "?")[0].toUpperCase()}
-                </span>
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-edge text-xs text-muted">
+                  {profile.avatar_url ? (
+                    <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    (profile.username ?? "?")[0].toUpperCase()
+                  )}
+                </div>
                 <span className="text-ink">{profile.username ?? "unnamed"}</span>
                 {profile.id === game.host_id && (
                   <span className="text-xs text-muted">host</span>

@@ -32,7 +32,7 @@ export default async function ResultsPage({
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, username")
+    .select("id, username, avatar_url")
     .in("id", playerIds);
 
   const { data: collages } = await supabase
@@ -60,7 +60,7 @@ export default async function ResultsPage({
         { length: 9 },
         (_, i) => rawPhotos[i] ?? null
       );
-      return { id, username: profile?.username ?? null, photos, votes: voteCounts[id] ?? 0 };
+      return { id, username: profile?.username ?? null, avatarUrl: profile?.avatar_url ?? null, photos, votes: voteCounts[id] ?? 0 };
     })
     .sort((a, b) => b.votes - a.votes);
 
@@ -86,9 +86,13 @@ export default async function ResultsPage({
                 <span className="font-display text-lg tracking-[0.05em] text-muted">
                   {index + 1}
                 </span>
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-edge text-xs text-muted">
-                  {(player.username ?? "?")[0].toUpperCase()}
-                </span>
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-edge text-xs text-muted">
+                  {player.avatarUrl ? (
+                    <img src={player.avatarUrl} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    (player.username ?? "?")[0].toUpperCase()
+                  )}
+                </div>
                 <span className="text-sm text-ink">{player.username ?? "unnamed"}</span>
                 <span className="ml-auto font-display text-sm tracking-[0.1em] text-muted">
                   {player.votes} {player.votes === 1 ? "vote" : "votes"}

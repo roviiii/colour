@@ -33,7 +33,7 @@ export default async function PlayPage({
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, username")
+    .select("id, username, avatar_url")
     .in("id", playerIds);
 
   const { data: collages } = await supabase
@@ -54,7 +54,7 @@ export default async function PlayPage({
       { length: 9 },
       (_, i) => rawPhotos[i] ?? null
     );
-    return { id, username: profile?.username ?? null, photos };
+    return { id, username: profile?.username ?? null, avatarUrl: profile?.avatar_url ?? null, photos };
   });
 
   return (

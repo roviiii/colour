@@ -6,6 +6,7 @@ import Link from "next/link";
 type Player = {
   id: string;
   username: string | null;
+  avatarUrl: string | null;
   photos: (string | null)[];
 };
 
@@ -31,9 +32,13 @@ export default function CollageGallery({ userId, code, gameType, gameEnded, play
         {players.map((player) => (
           <div key={player.id}>
             <div className="mb-3 flex items-center gap-2">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-edge text-xs text-muted">
-                {(player.username ?? "?")[0].toUpperCase()}
-              </span>
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-edge text-xs text-muted">
+                {player.avatarUrl ? (
+                  <img src={player.avatarUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  (player.username ?? "?")[0].toUpperCase()
+                )}
+              </div>
               <span className="text-sm text-ink">{player.username ?? "unnamed"}</span>
               {player.id === userId && (
                 <Link

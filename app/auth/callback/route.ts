@@ -25,8 +25,12 @@ export async function GET(request: NextRequest) {
       }
     );
 
+    const type = searchParams.get("type");
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      if (type === "recovery") {
+        return NextResponse.redirect(`${origin}/auth/update-password`);
+      }
       return NextResponse.redirect(`${origin}/gallery`);
     }
   }

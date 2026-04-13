@@ -110,6 +110,11 @@ export default function LoginPage() {
             Sign up
           </Link>
         </p>
+        <p className="mt-3 text-sm text-muted">
+          <Link href="/auth/forgot-password" className="underline underline-offset-4 hover:text-ink">
+            Forgot password?
+          </Link>
+        </p>
       </div>
     </div>
   );
