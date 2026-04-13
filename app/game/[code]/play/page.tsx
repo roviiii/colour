@@ -68,7 +68,7 @@ export default async function PlayPage({
             {game.theme_value}
           </h1>
         </div>
-        {user.id === game.host_id && game.status === "playing" && (
+        {user.id === game.host_id && (game.status === "waiting" || game.status === "playing") && (
           <EndGameButton
             gameId={game.id}
             code={code.toUpperCase()}

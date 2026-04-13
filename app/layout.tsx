@@ -40,6 +40,18 @@ export default async function RootLayout({
         .single()
     : { data: null };
 
+  const { data: gameMemberships } = user
+    ? await supabase
+        .from("game_players")
+        .select("games(code, theme_value, status)")
+        .eq("user_id", user.id)
+    : { data: null };
+
+  type ActiveGame = { code: string; theme_value: string; status: string };
+  const activeGames = (gameMemberships ?? [])
+    .map((m) => m.games as unknown as ActiveGame | null)
+    .filter((g): g is ActiveGame => g !== null && g.status !== "ended");
+
   return (
     <html lang="en" className={`${bebasNeue.variable} ${dmSans.variable}`} suppressHydrationWarning>
       <body>
@@ -48,6 +60,7 @@ export default async function RootLayout({
           <Navbar
             avatarUrl={profile?.avatar_url ?? null}
             username={profile?.username ?? null}
+            activeGames={activeGames}
           />
         )}
         <main className="mx-auto max-w-4xl px-6 py-10">{children}</main>
