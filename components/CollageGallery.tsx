@@ -64,6 +64,55 @@ export default function CollageGallery({ userId, gameId, code, gameType, gameEnd
   const isBlurred = (playerId: string) =>
     gameType === "competitive" && !gameEnded && playerId !== userId;
 
+  async function downloadCollage(photos: (string | null)[], filename: string) {
+    const cellSize = 300;
+    const gap = 2;
+    const total = cellSize * 3 + gap * 2;
+    const canvas = document.createElement("canvas");
+    canvas.width = total;
+    canvas.height = total;
+    const ctx = canvas.getContext("2d")!;
+
+    for (let i = 0; i < 9; i++) {
+      const col = i % 3;
+      const row = Math.floor(i / 3);
+      const x = col * (cellSize + gap);
+      const y = row * (cellSize + gap);
+      const photo = photos[i];
+
+      if (photo) {
+        await new Promise<void>((resolve) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => {
+            const scale = Math.max(cellSize / img.width, cellSize / img.height);
+            const sw = cellSize / scale;
+            const sh = cellSize / scale;
+            const sx = (img.width - sw) / 2;
+            const sy = (img.height - sh) / 2;
+            ctx.drawImage(img, sx, sy, sw, sh, x, y, cellSize, cellSize);
+            resolve();
+          };
+          img.onerror = () => resolve();
+          img.src = photo;
+        });
+      } else {
+        ctx.fillStyle = "#1a1a1a";
+        ctx.fillRect(x, y, cellSize, cellSize);
+      }
+    }
+
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${filename}.jpg`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }, "image/jpeg", 0.92);
+  }
+
   return (
     <>
       <div className="grid grid-cols-2 gap-8">
@@ -78,14 +127,25 @@ export default function CollageGallery({ userId, gameId, code, gameType, gameEnd
                 )}
               </div>
               <span className="text-sm text-ink">{player.username ?? "unnamed"}</span>
-              {player.id === userId && !gameEnded && (
-                <Link
-                  href={`/game/${code}/play/build`}
-                  className="ml-auto text-xs text-muted underline underline-offset-2 hover:text-ink"
-                >
-                  edit
-                </Link>
-              )}
+              <div className="ml-auto flex items-center gap-3">
+                {!isBlurred(player.id) && player.photos.some(Boolean) && (
+                  <button
+                    type="button"
+                    onClick={() => downloadCollage(player.photos, player.username ?? "collage")}
+                    className="text-xs text-muted underline underline-offset-2 hover:text-ink"
+                  >
+                    save
+                  </button>
+                )}
+                {player.id === userId && !gameEnded && (
+                  <Link
+                    href={`/game/${code}/play/build`}
+                    className="text-xs text-muted underline underline-offset-2 hover:text-ink"
+                  >
+                    edit
+                  </Link>
+                )}
+              </div>
             </div>
 
             <button

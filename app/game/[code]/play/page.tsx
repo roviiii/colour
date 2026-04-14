@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import CollageGallery from "@/components/CollageGallery";
 import EndGameButton from "@/components/EndGameButton";
 import LeaveGameButton from "@/components/LeaveGameButton";
+import ShareButton from "@/components/ShareButton";
 
 export default async function PlayPage({
   params,
@@ -74,19 +75,22 @@ export default async function PlayPage({
             </p>
           )}
         </div>
-        {user.id === game.host_id && (game.status === "waiting" || game.status === "playing") && (
-          <EndGameButton
-            gameId={game.id}
-            code={code.toUpperCase()}
-            gameType={game.game_type}
-          />
-        )}
-        {game.status === "ended" && (
-          <p className="font-display text-sm tracking-[0.2em] text-muted">GAME OVER</p>
-        )}
-        {user.id !== game.host_id && game.status !== "ended" && (
-          <LeaveGameButton gameId={game.id} />
-        )}
+        <div className="flex items-center gap-3">
+          <ShareButton />
+          {user.id === game.host_id && (game.status === "waiting" || game.status === "playing") && (
+            <EndGameButton
+              gameId={game.id}
+              code={code.toUpperCase()}
+              gameType={game.game_type}
+            />
+          )}
+          {game.status === "ended" && (
+            <p className="font-display text-sm tracking-[0.2em] text-muted">GAME OVER</p>
+          )}
+          {user.id !== game.host_id && game.status !== "ended" && (
+            <LeaveGameButton gameId={game.id} />
+          )}
+        </div>
       </div>
       <CollageGallery
         userId={user.id}
