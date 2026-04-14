@@ -88,11 +88,9 @@ export default async function GalleryPage() {
                     <p className="font-display text-[1.4rem] tracking-[0.04em]">
                       {game?.theme_value ?? "untitled"}
                     </p>
-                    {game?.location_name && (
-                      <p className="text-xs uppercase tracking-[0.2em] text-muted">
-                        {game.location_name.split(",")[0]}
-                      </p>
-                    )}
+                    <p className={`text-xs uppercase tracking-[0.2em] text-muted ${!game?.location_name ? "invisible" : ""}`}>
+                      {game?.location_name?.split(",")[0] ?? "—"}
+                    </p>
                     <p className="text-xs text-muted">{date}</p>
                   </div>
                   <DeleteCollageButton collageId={collage.id} gameId={game?.id ?? ""} />

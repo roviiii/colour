@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase-server";
 import { redirect, notFound } from "next/navigation";
-import Link from "next/link";
 import VoteGrid from "@/components/VoteGrid";
+import WaitingForResults from "@/components/WaitingForResults";
 
 export default async function VotePage({
   params,
@@ -74,14 +74,7 @@ export default async function VotePage({
 
       {existingVote ? (
         <div className="fade-up">
-          <p className="font-display text-[2rem] tracking-[0.05em]">VOTE SUBMITTED</p>
-          <p className="mt-2 text-sm text-muted">Waiting for others...</p>
-          <Link
-            href={`/game/${code.toUpperCase()}/results`}
-            className="mt-6 inline-block text-sm text-muted underline underline-offset-2 hover:text-ink"
-          >
-            Check for results →
-          </Link>
+          <WaitingForResults gameId={game.id} code={code.toUpperCase()} />
         </div>
       ) : (
         <div className="fade-up">

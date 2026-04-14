@@ -1,8 +1,7 @@
 import { createClient } from "@/lib/supabase-server";
 import { redirect, notFound } from "next/navigation";
-import Link from "next/link";
 import CopyCodeButton from "@/components/CopyCodeButton";
-import LeaveGameButton from "@/components/LeaveGameButton";
+import LobbyLive from "@/components/LobbyLive";
 
 export default async function GameLobbyPage({
   params,
@@ -43,6 +42,12 @@ export default async function GameLobbyPage({
     .single();
 
   const hasStarted = (collage?.photos as (string | null)[])?.some((p) => p !== null) ?? false;
+
+  const lobbyPlayers = (profiles ?? []).map((p) => ({
+    id: p.id,
+    username: p.username,
+    avatarUrl: p.avatar_url,
+  }));
 
   const endsAt = new Date(game.ends_at);
 
@@ -92,41 +97,14 @@ export default async function GameLobbyPage({
           <CopyCodeButton code={code.toUpperCase()} />
         </div>
 
-        <div className="mb-8">
-          <p className="mb-4 text-xs uppercase tracking-[0.2em] text-muted">
-            Players ({playerIds.length})
-          </p>
-          <ul className="flex flex-col gap-3">
-            {profiles?.map((profile) => (
-              <li key={profile.id} className="flex items-center gap-3 text-sm">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-edge text-xs text-muted">
-                  {profile.avatar_url ? (
-                    <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    (profile.username ?? "?")[0].toUpperCase()
-                  )}
-                </div>
-                <span className="text-ink">{profile.username ?? "unnamed"}</span>
-                {profile.id === game.host_id && (
-                  <span className="text-xs text-muted">host</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <Link
-          href={`/game/${code.toUpperCase()}/play`}
-          className="block w-full bg-ink py-3.5 text-center font-display tracking-[0.18em] text-cream transition-opacity hover:opacity-75"
-        >
-          {hasStarted ? "CONTINUE PLAYING" : "START PLAYING"}
-        </Link>
-
-        {user.id !== game.host_id && (
-          <div className="mt-4 flex justify-center">
-            <LeaveGameButton gameId={game.id} />
-          </div>
-        )}
+        <LobbyLive
+          gameId={game.id}
+          code={code.toUpperCase()}
+          isHost={user.id === game.host_id}
+          hostId={game.host_id}
+          hasStarted={hasStarted}
+          players={lobbyPlayers}
+        />
       </div>
     </div>
   );

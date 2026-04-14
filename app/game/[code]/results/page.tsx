@@ -1,6 +1,13 @@
 import { createClient } from "@/lib/supabase-server";
 import { redirect, notFound } from "next/navigation";
 
+function ordinal(n: number) {
+  if (n === 1) return "1ST";
+  if (n === 2) return "2ND";
+  if (n === 3) return "3RD";
+  return `${n}TH`;
+}
+
 export default async function ResultsPage({
   params,
 }: {
@@ -14,7 +21,7 @@ export default async function ResultsPage({
 
   const { data: game } = await supabase
     .from("games")
-    .select("id, theme_type, theme_value, game_type, status")
+    .select("id, theme_type, theme_value, game_type, status, location_name")
     .eq("code", code.toUpperCase())
     .single();
 
@@ -65,6 +72,8 @@ export default async function ResultsPage({
     .sort((a, b) => b.votes - a.votes);
 
   const topVotes = players[0]?.votes ?? 0;
+  const winners = players.filter((p) => p.votes === topVotes && topVotes > 0);
+  const rest = players.filter((p) => !(p.votes === topVotes && topVotes > 0));
 
   return (
     <div className="w-full">
@@ -75,16 +84,57 @@ export default async function ResultsPage({
         <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.9] tracking-[0.02em]">
           {game.theme_value}
         </h1>
+        {game.location_name && (
+          <p className="mt-1 text-xs uppercase tracking-[0.2em] text-muted">
+            {game.location_name.split(",")[0]}
+          </p>
+        )}
       </div>
 
-      <div className="fade-up grid grid-cols-2 gap-8">
-        {players.map((player, index) => {
-          const isWinner = player.votes === topVotes && topVotes > 0;
-          return (
-            <div key={player.id}>
+      {winners.map((winner) => (
+        <div
+          key={winner.id}
+          className="fade-up mb-12 border border-ink p-8"
+        >
+          <div className="mb-6 flex items-end justify-between">
+            <div>
+              <p className="mb-1 text-xs uppercase tracking-[0.2em] text-muted">1ST PLACE</p>
+              <p className="font-display text-[clamp(2rem,5vw,3.5rem)] leading-[0.9] tracking-[0.02em]">
+                {winner.username ?? "unnamed"}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="font-display text-[clamp(1.5rem,4vw,2.5rem)] leading-[0.9] tracking-[0.02em]">
+                {winner.id === user.id ? "YOU WON" : "WINNER"}
+              </p>
+              <p className="mt-1 text-xs uppercase tracking-[0.2em] text-muted">
+                {winner.votes} {winner.votes === 1 ? "vote" : "votes"}
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-[3px]">
+            {winner.photos.map((photo, i) => (
+              <div key={i} className="aspect-square bg-edge">
+                {photo && (
+                  <img src={photo} alt="" className="h-full w-full object-cover" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {rest.length > 0 && (
+        <div className="grid grid-cols-2 gap-8">
+          {rest.map((player, index) => (
+            <div
+              key={player.id}
+              className="fade-up"
+              style={{ animationDelay: `${(index + 1) * 80}ms` }}
+            >
               <div className="mb-3 flex items-center gap-2">
-                <span className="font-display text-lg tracking-[0.05em] text-muted">
-                  {index + 1}
+                <span className="font-display text-sm tracking-[0.1em] text-muted">
+                  {ordinal(winners.length + index + 1)}
                 </span>
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-edge text-xs text-muted">
                   {player.avatarUrl ? (
@@ -94,36 +144,29 @@ export default async function ResultsPage({
                   )}
                 </div>
                 <span className="text-sm text-ink">{player.username ?? "unnamed"}</span>
-                <span className="ml-auto font-display text-sm tracking-[0.1em] text-muted">
+                <span className="ml-auto font-display text-xs tracking-[0.1em] text-muted">
                   {player.votes} {player.votes === 1 ? "vote" : "votes"}
                 </span>
               </div>
-
-              <div className={`border-2 ${isWinner ? "border-ink" : "border-edge"}`}>
+              <div className="border border-edge">
                 <div className="grid grid-cols-3 gap-[2px]">
                   {player.photos.map((photo, i) => (
                     <div key={i} className="aspect-square bg-edge">
                       {photo && (
-                        <img
-                          src={photo}
-                          alt=""
-                          className="h-full w-full object-cover"
-                        />
+                        <img src={photo} alt="" className="h-full w-full object-cover" />
                       )}
                     </div>
                   ))}
                 </div>
               </div>
-
-              {isWinner && (
-                <p className="mt-2 font-display text-xs tracking-[0.2em] text-ink">
-                  WINNER
-                </p>
-              )}
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
+
+      {topVotes === 0 && (
+        <p className="text-sm text-muted">No votes were cast.</p>
+      )}
     </div>
   );
 }

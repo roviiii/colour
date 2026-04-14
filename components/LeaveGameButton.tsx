@@ -18,12 +18,9 @@ export default function LeaveGameButton({ gameId }: Props) {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    await supabase
-      .from("game_players")
-      .delete()
-      .eq("game_id", gameId)
-      .eq("user_id", user.id);
-    router.push("/gallery");
+    await supabase.from("game_players").delete().eq("game_id", gameId).eq("user_id", user.id);
+    await supabase.from("collages").delete().eq("game_id", gameId).eq("user_id", user.id);
+    window.location.href = "/gallery";
   }
 
   return (

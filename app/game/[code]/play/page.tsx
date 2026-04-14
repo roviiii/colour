@@ -90,6 +90,7 @@ export default async function PlayPage({
       </div>
       <CollageGallery
         userId={user.id}
+        gameId={game.id}
         code={code.toUpperCase()}
         gameType={game.game_type}
         gameEnded={game.status === "ended"}

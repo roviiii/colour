@@ -51,7 +51,7 @@ export default async function RootLayout({
   type ActiveGame = { code: string; theme_value: string; status: string };
   const activeGames = (gameMemberships ?? [])
     .map((m) => m.games as unknown as ActiveGame | null)
-    .filter((g): g is ActiveGame => g !== null && g.status !== "ended");
+    .filter((g): g is ActiveGame => g !== null && (g.status === "playing" || g.status === "voting"));
 
   return (
     <html lang="en" className={`${bebasNeue.variable} ${dmSans.variable}`} suppressHydrationWarning>

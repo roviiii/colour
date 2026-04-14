@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase";
 
 type Player = {
   id: string;
@@ -12,15 +14,51 @@ type Player = {
 
 type Props = {
   userId: string;
+  gameId: string;
   code: string;
   gameType: "competitive" | "friendly";
   gameEnded: boolean;
   players: Player[];
 };
 
-export default function CollageGallery({ userId, code, gameType, gameEnded, players }: Props) {
+export default function CollageGallery({ userId, gameId, code, gameType, gameEnded, players }: Props) {
+  const router = useRouter();
   const [zoomed, setZoomed]   = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const gameChannel = supabase
+      .channel(`game-${gameId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "games", filter: `id=eq.${gameId}` },
+        (payload) => {
+          const status = (payload.new as { status: string }).status;
+          if (status === "voting") router.push(`/game/${code}/vote`);
+          if (status === "ended") {
+            if (gameType === "competitive") router.push(`/game/${code}/results`);
+            else router.refresh();
+          }
+        }
+      )
+      .subscribe();
+
+    const collagesChannel = supabase
+      .channel(`collages-${gameId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "collages", filter: `game_id=eq.${gameId}` },
+        () => router.refresh()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(gameChannel);
+      supabase.removeChannel(collagesChannel);
+    };
+  }, [gameId, code, gameType, router]);
 
   const zoomedPlayer = players.find((p) => p.id === zoomed);
   const isBlurred = (playerId: string) =>
