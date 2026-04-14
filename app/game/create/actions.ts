@@ -17,6 +17,7 @@ export async function createGame(payload: {
   themeValue: string;
   gameType: "competitive" | "friendly";
   endsAt: string;
+  location?: { name: string; lat: number; lng: number } | null;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -34,6 +35,9 @@ export async function createGame(payload: {
       game_type: payload.gameType,
       status: "waiting",
       ends_at: new Date(payload.endsAt).toISOString(),
+      location_name: payload.location?.name ?? null,
+      location_lat: payload.location?.lat ?? null,
+      location_lng: payload.location?.lng ?? null,
     })
     .select("id")
     .single();

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase-server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import CopyCodeButton from "@/components/CopyCodeButton";
+import LeaveGameButton from "@/components/LeaveGameButton";
 
 export default async function GameLobbyPage({
   params,
@@ -16,7 +17,7 @@ export default async function GameLobbyPage({
 
   const { data: game } = await supabase
     .from("games")
-    .select("id, theme_type, theme_value, game_type, status, ends_at, host_id")
+    .select("id, theme_type, theme_value, game_type, status, ends_at, host_id, location_name, location_lat, location_lng")
     .eq("code", code.toUpperCase())
     .single();
 
@@ -34,6 +35,15 @@ export default async function GameLobbyPage({
     .select("id, username, avatar_url")
     .in("id", playerIds);
 
+  const { data: collage } = await supabase
+    .from("collages")
+    .select("photos")
+    .eq("game_id", game.id)
+    .eq("user_id", user.id)
+    .single();
+
+  const hasStarted = (collage?.photos as (string | null)[])?.some((p) => p !== null) ?? false;
+
   const endsAt = new Date(game.ends_at);
 
   return (
@@ -44,6 +54,19 @@ export default async function GameLobbyPage({
       <h1 className="mb-2 font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.9] tracking-[0.02em]">
         {game.theme_value}
       </h1>
+      {game.location_name && (
+        <p className="mb-3 text-xs uppercase tracking-[0.2em] text-muted">
+          {game.location_name.split(",")[0]}
+        </p>
+      )}
+      {game.location_lat && game.location_lng && (
+        <iframe
+          src={`https://www.openstreetmap.org/export/embed.html?bbox=${game.location_lng - 0.15},${game.location_lat - 0.1},${game.location_lng + 0.15},${game.location_lat + 0.1}&layer=mapnik&marker=${game.location_lat},${game.location_lng}`}
+          className="mb-6 w-full border border-edge"
+          style={{ height: "140px" }}
+          loading="lazy"
+        />
+      )}
       <p className="mb-10 text-sm text-muted">
         Ends{" "}
         {endsAt.toLocaleDateString("en-GB", {
@@ -96,8 +119,14 @@ export default async function GameLobbyPage({
           href={`/game/${code.toUpperCase()}/play`}
           className="block w-full bg-ink py-3.5 text-center font-display tracking-[0.18em] text-cream transition-opacity hover:opacity-75"
         >
-          START PLAYING
+          {hasStarted ? "CONTINUE PLAYING" : "START PLAYING"}
         </Link>
+
+        {user.id !== game.host_id && (
+          <div className="mt-4 flex justify-center">
+            <LeaveGameButton gameId={game.id} />
+          </div>
+        )}
       </div>
     </div>
   );

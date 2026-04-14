@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createGame } from "./actions";
+import LocationSearch from "@/components/LocationSearch";
 
 const RANDOM_COLOURS = [
   "Cerulean", "Vermillion", "Ochre", "Viridian", "Cobalt", "Chartreuse",
@@ -41,6 +42,7 @@ export default function CreateGamePage() {
   const [themeValue, setThemeValue] = useState("");
   const [gameType, setGameType]     = useState<"competitive" | "friendly">("friendly");
   const [endsAt, setEndsAt]         = useState(defaultEndsAt());
+  const [location, setLocation]     = useState<{ name: string; lat: number; lng: number } | null>(null);
   const [error, setError]           = useState("");
   const [loading, setLoading]       = useState(false);
 
@@ -49,7 +51,7 @@ export default function CreateGamePage() {
     setError("");
     setLoading(true);
     try {
-      const { code } = await createGame({ themeType, themeValue, gameType, endsAt });
+      const { code } = await createGame({ themeType, themeValue, gameType, endsAt, location });
       router.push(`/game/${code}`);
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");
@@ -133,6 +135,15 @@ export default function CreateGamePage() {
             {gameType === "competitive"
               ? "Players vote on each other's collages after submitting."
               : "No voting — just create and share your collage."}
+          </p>
+        </div>
+
+        {/* Location */}
+        <div>
+          <p className={labelClass}>Location <span className="normal-case">(optional)</span></p>
+          <LocationSearch onSelect={setLocation} />
+          <p className="mt-1.5 text-xs text-muted">
+            Tie this game to a real place — e.g. London + Red.
           </p>
         </div>
 

@@ -1,12 +1,28 @@
 @import "tailwindcss";
 
-@theme {
+:root {
   --color-cream:   #F6F3EE;
   --color-ink:     #0F0F0F;
   --color-muted:   #999999;
   --color-edge:    #E2DDD6;
   --color-danger:  #E63946;
   --color-success: #2ECC71;
+}
+
+[data-theme="night"] {
+  --color-cream:  #0F0F0F;
+  --color-ink:    #F6F3EE;
+  --color-edge:   #1E1E1E;
+  --color-muted:  #777777;
+}
+
+@theme inline {
+  --color-cream:   var(--color-cream);
+  --color-ink:     var(--color-ink);
+  --color-muted:   var(--color-muted);
+  --color-edge:    var(--color-edge);
+  --color-danger:  var(--color-danger);
+  --color-success: var(--color-success);
 
   --font-display: var(--font-bebas);
   --font-sans:    var(--font-dm-sans);
@@ -16,13 +32,6 @@ body {
   background-color: var(--color-cream);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
-}
-
-[data-theme="night"] {
-  --color-cream:  #0F0F0F;
-  --color-ink:    #F6F3EE;
-  --color-edge:   #2A2520;
-  --color-muted:  #777777;
 }
 
 /* ── Spectrum gradient text ──────────────────────────────────

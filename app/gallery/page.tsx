@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
+import DeleteCollageButton from "@/components/DeleteCollageButton";
 
 export default async function GalleryPage() {
   const supabase = await createClient();
@@ -9,11 +10,11 @@ export default async function GalleryPage() {
 
   const { data: collages } = await supabase
     .from("collages")
-    .select("photos, updated_at, games(code, theme_value, theme_type, status)")
+    .select("id, photos, updated_at, games(id, code, theme_value, theme_type, game_type, status, location_name)")
     .eq("user_id", user.id)
     .order("updated_at", { ascending: false });
 
-  type Game = { code: string; theme_value: string; theme_type: string; status: string };
+  type Game = { id: string; code: string; theme_value: string; theme_type: string; game_type: string; status: string; location_name: string | null };
 
   const filled = (collages ?? []).filter((c) => {
     const photos = c.photos as (string | null)[];
@@ -56,7 +57,7 @@ export default async function GalleryPage() {
         </div>
       ) : (
         <div className="fade-up grid grid-cols-2 gap-8">
-          {filled.map((collage, idx) => {
+          {filled.map((collage) => {
             const game = collage.games as unknown as Game | null;
             const rawPhotos = (collage.photos as (string | null)[]) ?? [];
             const photos: (string | null)[] = Array.from(
@@ -66,18 +67,35 @@ export default async function GalleryPage() {
             const href = game
               ? game.status === "waiting"
                 ? `/game/${game.code}`
+                : game.status === "ended" && game.game_type === "competitive"
+                ? `/game/${game.code}/results`
                 : `/game/${game.code}/play`
               : "#";
 
+            const date = new Date(collage.updated_at).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            });
+
             return (
-              <div key={idx}>
-                <div className="mb-3">
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted">
-                    {game?.theme_type ?? ""}
-                  </p>
-                  <p className="font-display text-[1.4rem] tracking-[0.04em]">
-                    {game?.theme_value ?? "untitled"}
-                  </p>
+              <div key={collage.id}>
+                <div className="mb-3 flex items-start justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted">
+                      {game?.theme_type ?? ""}
+                    </p>
+                    <p className="font-display text-[1.4rem] tracking-[0.04em]">
+                      {game?.theme_value ?? "untitled"}
+                    </p>
+                    {game?.location_name && (
+                      <p className="text-xs uppercase tracking-[0.2em] text-muted">
+                        {game.location_name.split(",")[0]}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted">{date}</p>
+                  </div>
+                  <DeleteCollageButton collageId={collage.id} gameId={game?.id ?? ""} />
                 </div>
                 <Link href={href} className="block border border-edge transition-colors hover:border-ink">
                   <div className="grid grid-cols-3 gap-[2px]">

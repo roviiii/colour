@@ -49,8 +49,7 @@ export default async function VotePage({
     .eq("voter_id", user.id)
     .single();
 
-  const otherPlayers = playerIds
-    .filter((id) => id !== user.id)
+  const votablePlayers = playerIds
     .map((id) => {
       const profile = profiles?.find((p) => p.id === id);
       const collage = collages?.find((c) => c.user_id === id);
@@ -78,7 +77,7 @@ export default async function VotePage({
           <p className="font-display text-[2rem] tracking-[0.05em]">VOTE SUBMITTED</p>
           <p className="mt-2 text-sm text-muted">Waiting for others...</p>
           <Link
-            href={`/game/${code.toUpperCase()}/vote`}
+            href={`/game/${code.toUpperCase()}/results`}
             className="mt-6 inline-block text-sm text-muted underline underline-offset-2 hover:text-ink"
           >
             Check for results →
@@ -88,7 +87,7 @@ export default async function VotePage({
         <div className="fade-up">
           <p className="mb-8 text-sm text-muted">Pick your favourite collage.</p>
           <VoteGrid
-            players={otherPlayers}
+            players={votablePlayers}
             gameId={game.id}
             code={code.toUpperCase()}
           />

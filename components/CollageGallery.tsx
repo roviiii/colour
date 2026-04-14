@@ -40,7 +40,7 @@ export default function CollageGallery({ userId, code, gameType, gameEnded, play
                 )}
               </div>
               <span className="text-sm text-ink">{player.username ?? "unnamed"}</span>
-              {player.id === userId && (
+              {player.id === userId && !gameEnded && (
                 <Link
                   href={`/game/${code}/play/build`}
                   className="ml-auto text-xs text-muted underline underline-offset-2 hover:text-ink"

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase-server";
 import { redirect, notFound } from "next/navigation";
 import CollageGallery from "@/components/CollageGallery";
 import EndGameButton from "@/components/EndGameButton";
+import LeaveGameButton from "@/components/LeaveGameButton";
 
 export default async function PlayPage({
   params,
@@ -16,7 +17,7 @@ export default async function PlayPage({
 
   const { data: game } = await supabase
     .from("games")
-    .select("id, theme_type, theme_value, game_type, status, host_id")
+    .select("id, theme_type, theme_value, game_type, status, host_id, location_name")
     .eq("code", code.toUpperCase())
     .single();
 
@@ -67,6 +68,11 @@ export default async function PlayPage({
           <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.9] tracking-[0.02em]">
             {game.theme_value}
           </h1>
+          {game.location_name && (
+            <p className="mt-1 text-xs uppercase tracking-[0.2em] text-muted">
+              {game.location_name.split(",")[0]}
+            </p>
+          )}
         </div>
         {user.id === game.host_id && (game.status === "waiting" || game.status === "playing") && (
           <EndGameButton
@@ -77,6 +83,9 @@ export default async function PlayPage({
         )}
         {game.status === "ended" && (
           <p className="font-display text-sm tracking-[0.2em] text-muted">GAME OVER</p>
+        )}
+        {user.id !== game.host_id && game.status !== "ended" && (
+          <LeaveGameButton gameId={game.id} />
         )}
       </div>
       <CollageGallery

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bebas_Neue, DM_Sans } from "next/font/google";
 import "./globals.css";
+import Script from "next/script";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase-server";
 
@@ -55,7 +56,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${bebasNeue.variable} ${dmSans.variable}`} suppressHydrationWarning>
       <body>
-        <script dangerouslySetInnerHTML={{ __html: `(function(){var h=new Date().getHours();if(h<6||h>=20)document.documentElement.setAttribute('data-theme','night');})()` }} />
+        <Script strategy="beforeInteractive" id="theme-init">{`(function(){var h=new Date().getHours();if(h<9||h>=18)document.documentElement.setAttribute('data-theme','night');})();`}</Script>
         {user && (
           <Navbar
             avatarUrl={profile?.avatar_url ?? null}
