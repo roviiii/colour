@@ -26,6 +26,11 @@ export default function AvatarUpload({ userId, currentAvatarUrl }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 5 * 1024 * 1024) {
+      setError("File must be under 5 MB.");
+      return;
+    }
+
     setError("");
     setUploading(true);
     setPreview(URL.createObjectURL(file)); // show local preview immediately

@@ -6,7 +6,30 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const rateLimitMap = new Map<string, { count: number; reset: number }>();
+
+function isRateLimited(ip: string, max: number, windowMs: number): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.reset) {
+    rateLimitMap.set(ip, { count: 1, reset: now + windowMs });
+    return false;
+  }
+  if (entry.count >= max) return true;
+  entry.count++;
+  return false;
+}
+
 export async function middleware(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+  const authPaths = ["/auth", "/login", "/signup"];
+  const isAuthRoute = authPaths.some((p) =>
+    request.nextUrl.pathname.startsWith(p)
+  );
+  if (isAuthRoute && isRateLimited(ip, 20, 60_000)) {
+    return new NextResponse("Too many requests", { status: 429 });
+  }
+
   let response = NextResponse.next({
     request,
   });

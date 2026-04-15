@@ -1,7 +1,20 @@
 "use server";
 
+import { z } from "zod";
 import { createClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
+
+const createGameSchema = z.object({
+  themeType: z.enum(["colour", "word"]),
+  themeValue: z.string().trim().min(1).max(100),
+  gameType: z.enum(["competitive", "friendly"]),
+  endsAt: z.string().datetime(),
+  location: z.object({
+    name: z.string().min(1).max(200),
+    lat: z.number().min(-90).max(90),
+    lng: z.number().min(-180).max(180),
+  }).nullable().optional(),
+});
 
 function generateCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -12,13 +25,11 @@ function generateCode() {
   return code;
 }
 
-export async function createGame(payload: {
-  themeType: "colour" | "word";
-  themeValue: string;
-  gameType: "competitive" | "friendly";
-  endsAt: string;
-  location?: { name: string; lat: number; lng: number } | null;
-}) {
+export async function createGame(payload: unknown) {
+  const parsed = createGameSchema.safeParse(payload);
+  if (!parsed.success) throw new Error("Invalid input.");
+  const data = parsed.data;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -30,14 +41,14 @@ export async function createGame(payload: {
     .insert({
       code,
       host_id: user.id,
-      theme_type: payload.themeType,
-      theme_value: payload.themeValue.trim(),
-      game_type: payload.gameType,
+      theme_type: data.themeType,
+      theme_value: data.themeValue,
+      game_type: data.gameType,
       status: "waiting",
-      ends_at: new Date(payload.endsAt).toISOString(),
-      location_name: payload.location?.name ?? null,
-      location_lat: payload.location?.lat ?? null,
-      location_lng: payload.location?.lng ?? null,
+      ends_at: new Date(data.endsAt).toISOString(),
+      location_name: data.location?.name ?? null,
+      location_lat: data.location?.lat ?? null,
+      location_lng: data.location?.lng ?? null,
     })
     .select("id")
     .single();

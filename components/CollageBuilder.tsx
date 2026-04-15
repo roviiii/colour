@@ -22,6 +22,11 @@ export default function CollageBuilder({ gameId, userId, code, initialPhotos }: 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   async function handleFileChange(index: number, file: File) {
+    if (file.size > 10 * 1024 * 1024) {
+      setError("File must be under 10 MB.");
+      return;
+    }
+
     setError("");
     setUploading(index);
 
