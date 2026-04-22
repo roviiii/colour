@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import EditUsernameForm from "@/components/EditUsernameForm";
 import AvatarUpload from "@/components/AvatarUpload";
+import ChangePasswordForm from "@/components/ChangePasswordForm";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -40,6 +41,14 @@ export default async function ProfilePage() {
 
         {/* Edit form */}
         <EditUsernameForm currentUsername={profile?.username ?? ""} />
+
+        {/* Password */}
+        <div className="mt-8 border-t border-edge pt-8">
+          <p className="mb-4 text-[0.65rem] uppercase tracking-[0.2em] text-muted">
+            Change password
+          </p>
+          <ChangePasswordForm />
+        </div>
       </div>
     </div>
   );

@@ -26,10 +26,19 @@ export default function SignupPage() {
     setError("");
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    });
 
     if (error) {
-      setError(error.message);
+      const msg = error.message.toLowerCase();
+      if (msg.includes("already") || msg.includes("registered")) {
+        setError("An account with this email already exists. Try logging in instead.");
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
       return;
     }
