@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase-server";
 import { redirect, notFound } from "next/navigation";
 import CollageGallery from "@/components/CollageGallery";
 import EndGameButton from "@/components/EndGameButton";
+import GameCountdown from "@/components/GameCountdown";
 import LeaveGameButton from "@/components/LeaveGameButton";
 import ShareButton from "@/components/ShareButton";
 
@@ -18,7 +19,7 @@ export default async function PlayPage({
 
   const { data: game } = await supabase
     .from("games")
-    .select("id, theme_type, theme_value, game_type, status, host_id, location_name")
+    .select("id, theme_type, theme_value, game_type, status, host_id, location_name, ends_at")
     .eq("code", code.toUpperCase())
     .single();
 
@@ -73,6 +74,17 @@ export default async function PlayPage({
             <p className="mt-1 text-xs uppercase tracking-[0.2em] text-muted">
               {game.location_name.split(",")[0]}
             </p>
+          )}
+          {game.ends_at && game.status !== "ended" && (
+            <div className="mt-2">
+              <GameCountdown
+                endsAt={game.ends_at}
+                gameId={game.id}
+                code={code.toUpperCase()}
+                gameType={game.game_type as "competitive" | "friendly"}
+                isHost={user.id === game.host_id}
+              />
+            </div>
           )}
         </div>
         <div className="flex items-center gap-3">

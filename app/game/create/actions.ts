@@ -8,7 +8,10 @@ const createGameSchema = z.object({
   themeType: z.enum(["colour", "word"]),
   themeValue: z.string().trim().min(1).max(100),
   gameType: z.enum(["competitive", "friendly"]),
-  endsAt: z.string().datetime(),
+  endsAt: z.string().transform((val) => {
+    const normalized = val.length === 16 ? val + ":00" : val;
+    return new Date(normalized).toISOString();
+  }),
   location: z.object({
     name: z.string().min(1).max(200),
     lat: z.number().min(-90).max(90),
@@ -45,7 +48,7 @@ export async function createGame(payload: unknown) {
       theme_value: data.themeValue,
       game_type: data.gameType,
       status: "waiting",
-      ends_at: new Date(data.endsAt).toISOString(),
+      ends_at: data.endsAt,
       location_name: data.location?.name ?? null,
       location_lat: data.location?.lat ?? null,
       location_lng: data.location?.lng ?? null,
