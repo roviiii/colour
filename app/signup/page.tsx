@@ -56,19 +56,15 @@ export default function SignupPage() {
           <strong className="text-ink">{email}</strong>. Click it to activate
           your account.
         </p>
-        <p className="mt-3 text-xs text-muted">
-          Tip: disable email confirmation in Supabase → Auth → Settings for
-          development.
-        </p>
       </div>
     );
   }
 
   return (
-    <div className="grid min-h-[70vh] grid-cols-2 items-center gap-16">
+    <div className="grid min-h-[70vh] grid-cols-1 items-center gap-16 md:grid-cols-2">
 
       {/* ── Left — wordmark ─────────────────────────────────── */}
-      <div className="fade-up border-r border-edge pr-8">
+      <div className="fade-up hidden border-r border-edge pr-8 md:block">
         <h2 className="colour-gradient font-display text-[clamp(4rem,10vw,9rem)] leading-[0.88] tracking-[0.01em]">
           COLOUR
         </h2>

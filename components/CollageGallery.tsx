@@ -115,7 +115,7 @@ export default function CollageGallery({ userId, gameId, code, gameType, gameEnd
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
         {players.map((player) => (
           <div key={player.id}>
             <div className="mb-3 flex items-center gap-2">

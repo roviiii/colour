@@ -36,10 +36,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="grid min-h-[70vh] grid-cols-2 items-center gap-16">
+    <div className="grid min-h-[70vh] grid-cols-1 items-center gap-16 md:grid-cols-2">
 
       {/* ── Left — wordmark ─────────────────────────────────── */}
-      <div className="fade-up border-r border-edge pr-8">
+      <div className="fade-up hidden border-r border-edge pr-8 md:block">
         <h2 className="colour-gradient font-display text-[clamp(4rem,10vw,9rem)] leading-[0.88] tracking-[0.01em]">
           COLOUR
         </h2>

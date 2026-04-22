@@ -43,7 +43,7 @@ export default function VoteGrid({ players, gameId, code }: Props) {
 
   return (
     <div>
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
         {players.map((player) => {
           const selected = selectedId === player.id;
           return (

@@ -23,20 +23,20 @@ export default async function GalleryPage() {
 
   return (
     <div>
-      <div className="fade-up mb-10 flex items-end justify-between border-b border-edge pb-5">
+      <div className="fade-up mb-10 flex flex-col gap-4 border-b border-edge pb-5 sm:flex-row sm:items-end sm:justify-between">
         <h1 className="font-display text-[clamp(2.8rem,7vw,5.5rem)] leading-[0.9] tracking-[0.02em]">
           MY GALLERY
         </h1>
-        <div className="flex gap-2 pb-1">
+        <div className="flex gap-2 sm:pb-1">
           <Link
             href="/game/join"
-            className="border border-edge px-5 py-2 text-xs uppercase tracking-[0.1em] transition-colors hover:bg-edge"
+            className="border border-edge px-5 py-2 font-display tracking-[0.1em] text-ink transition-colors hover:bg-edge"
           >
-            Join game
+            JOIN GAME
           </Link>
           <Link
             href="/game/create"
-            className="bg-ink font-display px-5 py-2 tracking-[0.1em] text-cream transition-opacity hover:opacity-75"
+            className="bg-ink px-5 py-2 font-display tracking-[0.1em] text-cream transition-opacity hover:opacity-75"
           >
             NEW GAME
           </Link>
@@ -56,7 +56,7 @@ export default async function GalleryPage() {
           </p>
         </div>
       ) : (
-        <div className="fade-up grid grid-cols-2 gap-8">
+        <div className="fade-up grid grid-cols-1 gap-8 sm:grid-cols-2">
           {filled.map((collage) => {
             const game = collage.games as unknown as Game | null;
             const rawPhotos = (collage.photos as (string | null)[]) ?? [];

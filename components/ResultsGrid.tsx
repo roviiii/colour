@@ -129,7 +129,7 @@ export default function ResultsGrid({ players, currentUserId }: Props) {
       ))}
 
       {rest.length > 0 && (
-        <div className="grid grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
           {rest.map((player, index) => (
             <div
               key={player.id}
