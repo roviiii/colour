@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
 export default function SignupPage() {
+  const router = useRouter();
   const supabase = createClient();
 
   const [username, setUsername] = useState("");
@@ -48,6 +50,9 @@ export default function SignupPage() {
         .from("profiles")
         .update({ username: username.trim() })
         .eq("id", data.user.id);
+      router.push("/gallery");
+      router.refresh();
+      return;
     }
 
     setSuccess(true);
